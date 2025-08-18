@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { focusManager } from "../utils/keyboardNavigation";
 
 const Modal = ({
   isOpen,
@@ -20,21 +21,32 @@ const Modal = ({
       // Store the previously focused element
       previousFocusRef.current = document.activeElement;
 
-      // Focus the modal
-      if (modalRef.current) {
-        modalRef.current.focus();
-      }
+      // Set up focus trap
+      const cleanup = modalRef.current
+        ? focusManager.trapFocus(modalRef.current)
+        : null;
 
       // Prevent body scroll
       document.body.style.overflow = "hidden";
+
+      return () => {
+        // Cleanup focus trap
+        if (cleanup) cleanup();
+
+        // Restore body scroll
+        document.body.style.overflow = "";
+
+        // Restore focus to previously focused element
+        if (
+          previousFocusRef.current &&
+          typeof previousFocusRef.current.focus === "function"
+        ) {
+          previousFocusRef.current.focus();
+        }
+      };
     } else {
       // Restore body scroll
       document.body.style.overflow = "";
-
-      // Restore focus to previously focused element
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
-      }
     }
 
     return () => {

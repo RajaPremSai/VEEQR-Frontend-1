@@ -11,15 +11,24 @@ import ManagerLogs from "../manager/Logs";
 
 export default function ManagerPortal() {
   return (
-    <div className="portal-layout">
+    <div
+      className="portal-layout"
+      role="application"
+      aria-label="Manager Portal"
+    >
       <NavBar />
-      <main className="portal-content">
+      <main
+        id="main-content"
+        className="portal-content"
+        role="main"
+        aria-label="Main content area"
+      >
         <div className="container">
           <Routes>
             <Route index element={<ManagerDashboard />} />
             <Route path="users" element={<ManagerUsers />} />
             <Route path="gates" element={<ManagerGates />} />
-            <Route path="vehicles" element={<ManagerUniVehicles />} />
+            <Route path="u-vehicles" element={<ManagerUniVehicles />} />
             <Route
               path="personal-vehicles"
               element={<ManagerPersonalVehicles />}

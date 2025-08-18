@@ -46,6 +46,9 @@ const FormInput = ({
     ${disabled ? "form-label--disabled" : ""}
   `.trim();
 
+  const errorId = error ? `${inputId}-error` : undefined;
+  const describedBy = error ? errorId : undefined;
+
   return (
     <div className="form-field">
       <div className="form-input-container">
@@ -60,16 +63,30 @@ const FormInput = ({
           disabled={disabled}
           required={required}
           className={inputClasses}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={describedBy}
+          aria-required={required}
           {...props}
         />
         <label htmlFor={inputId} className={labelClasses}>
           {label}
-          {required && <span className="form-label-required">*</span>}
+          {required && (
+            <span className="form-label-required" aria-label="required">
+              *
+            </span>
+          )}
         </label>
       </div>
       {error && (
-        <div className="form-error" role="alert">
-          <span className="form-error-icon">⚠</span>
+        <div
+          id={errorId}
+          className="form-error"
+          role="alert"
+          aria-live="polite"
+        >
+          <span className="form-error-icon" aria-hidden="true">
+            ⚠
+          </span>
           <span className="form-error-text">{error}</span>
         </div>
       )}

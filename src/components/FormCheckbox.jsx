@@ -24,6 +24,9 @@ const FormCheckbox = ({
     ${className}
   `.trim();
 
+  const errorId = error ? `${checkboxId}-error` : undefined;
+  const describedBy = error ? errorId : undefined;
+
   return (
     <div className="form-field">
       <div className="form-checkbox-container">
@@ -34,10 +37,12 @@ const FormCheckbox = ({
           onChange={handleChange}
           disabled={disabled}
           className={checkboxClasses}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={describedBy}
           {...props}
         />
         <label htmlFor={checkboxId} className="form-checkbox-label">
-          <div className="form-checkbox-box">
+          <div className="form-checkbox-box" aria-hidden="true">
             <svg
               className="form-checkbox-check"
               width="12"
@@ -58,8 +63,15 @@ const FormCheckbox = ({
         </label>
       </div>
       {error && (
-        <div className="form-error" role="alert">
-          <span className="form-error-icon">⚠</span>
+        <div
+          id={errorId}
+          className="form-error"
+          role="alert"
+          aria-live="polite"
+        >
+          <span className="form-error-icon" aria-hidden="true">
+            ⚠
+          </span>
           <span className="form-error-text">{error}</span>
         </div>
       )}

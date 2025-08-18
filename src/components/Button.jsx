@@ -45,6 +45,14 @@ const Button = ({
     }
   };
 
+  const handleKeyDown = (e) => {
+    // Handle Enter and Space key activation
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick(e);
+    }
+  };
+
   const renderIcon = (position) => {
     if (!icon || iconPosition !== position) return null;
 
@@ -75,7 +83,9 @@ const Button = ({
       type={type}
       className={buttonClasses}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       disabled={disabled || loading}
+      aria-disabled={disabled || loading}
       {...props}
     >
       {loading && renderSpinner()}

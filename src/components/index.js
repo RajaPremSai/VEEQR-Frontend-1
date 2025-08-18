@@ -19,3 +19,7 @@ export { default as ProgressBar } from "./ProgressBar";
 export { default as ProtectedRoute } from "./ProtectedRoute";
 export { default as SkeletonLoader } from "./SkeletonLoader";
 export { default as Toast } from "./Toast";
+
+// Accessibility Components
+export { default as KeyboardShortcuts } from "./KeyboardShortcuts";
+export * from "./AccessibilityUtils";

@@ -46,6 +46,9 @@ const FormSelect = ({
     ${disabled ? "form-label--disabled" : ""}
   `.trim();
 
+  const errorId = error ? `${selectId}-error` : undefined;
+  const describedBy = error ? errorId : undefined;
+
   return (
     <div className="form-field">
       <div className="form-select-container">
@@ -58,6 +61,9 @@ const FormSelect = ({
           disabled={disabled}
           required={required}
           className={selectClasses}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={describedBy}
+          aria-required={required}
           {...props}
         >
           <option value="" disabled hidden>
@@ -71,9 +77,13 @@ const FormSelect = ({
         </select>
         <label htmlFor={selectId} className={labelClasses}>
           {label}
-          {required && <span className="form-label-required">*</span>}
+          {required && (
+            <span className="form-label-required" aria-label="required">
+              *
+            </span>
+          )}
         </label>
-        <div className="form-select-arrow">
+        <div className="form-select-arrow" aria-hidden="true">
           <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
             <path
               d="M1 1.5L6 6.5L11 1.5"
@@ -86,8 +96,15 @@ const FormSelect = ({
         </div>
       </div>
       {error && (
-        <div className="form-error" role="alert">
-          <span className="form-error-icon">⚠</span>
+        <div
+          id={errorId}
+          className="form-error"
+          role="alert"
+          aria-live="polite"
+        >
+          <span className="form-error-icon" aria-hidden="true">
+            ⚠
+          </span>
           <span className="form-error-text">{error}</span>
         </div>
       )}

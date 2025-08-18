@@ -1,12 +1,55 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../state/AuthContext";
+import { useKeyboardNavigation } from "../utils/keyboardNavigation";
 
 export default function NavBar() {
   const { profile, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
+
+  // Keyboard navigation shortcuts
+  const shortcuts = {
+    "alt+h": () => {
+      const homeRoute = `/${profile?.role?.toLowerCase() || "user"}`;
+      navigate(homeRoute);
+    },
+    "alt+p": () => {
+      const profileRoute = `/${profile?.role?.toLowerCase() || "user"}/profile`;
+      navigate(profileRoute);
+    },
+    "alt+l": () => logout(),
+    escape: () => {
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    },
+  };
+
+  // Add role-specific shortcuts
+  if (profile?.role === "USER") {
+    shortcuts["alt+v"] = () => navigate("/user/vehicles");
+    shortcuts["alt+a"] = () => navigate("/user/announcements");
+  } else if (profile?.role === "SECURITY_GUARD") {
+    shortcuts["alt+s"] = () => navigate("/guard/scanner");
+    shortcuts["alt+g"] = () => navigate("/guard/gates");
+  } else if (profile?.role === "MANAGER") {
+    shortcuts["alt+u"] = () => navigate("/manager/users");
+    shortcuts["alt+g"] = () => navigate("/manager/guards");
+    shortcuts["alt+v"] = () => navigate("/manager/u-vehicles");
+    shortcuts["alt+a"] = () => navigate("/manager/announcements");
+  }
+
+  useKeyboardNavigation({
+    shortcuts,
+    onEscape: () => {
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    },
+  });
 
   const getRoleIcon = (role) => {
     switch (role) {
@@ -144,7 +187,11 @@ export default function NavBar() {
 
   return (
     <>
-      <nav className="navbar-enhanced">
+      <nav
+        className="navbar-enhanced"
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="navbar-container">
           {/* Logo and Brand */}
           <div className="navbar-brand">
@@ -163,7 +210,11 @@ export default function NavBar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="navbar-nav-desktop">
+          <div
+            className="navbar-nav-desktop"
+            role="menubar"
+            aria-label="Main menu"
+          >
             {navigationItems.map((item) => (
               <Link
                 key={item.path}
@@ -172,8 +223,12 @@ export default function NavBar() {
                   currentPath === item.path ? "active" : ""
                 }`}
                 style={{ "--role-color": getRoleColor(profile.role) }}
+                role="menuitem"
+                aria-current={currentPath === item.path ? "page" : undefined}
               >
-                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-icon" aria-hidden="true">
+                  {item.icon}
+                </span>
                 <span className="nav-label">{item.label}</span>
               </Link>
             ))}
@@ -205,7 +260,15 @@ export default function NavBar() {
             <button
               className="mobile-menu-toggle"
               onClick={toggleMobileMenu}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toggleMobileMenu();
+                }
+              }}
               aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               <span className={`hamburger ${isMobileMenuOpen ? "open" : ""}`}>
                 <span></span>
@@ -219,21 +282,32 @@ export default function NavBar() {
         {/* Breadcrumb Navigation */}
         {breadcrumbs.length > 0 && (
           <div className="breadcrumb-container">
-            <div className="breadcrumb-nav">
-              {breadcrumbs.map((crumb, index) => (
-                <div key={crumb.path} className="breadcrumb-item">
-                  {index > 0 && <span className="breadcrumb-separator">›</span>}
-                  <Link
-                    to={crumb.path}
-                    className="breadcrumb-link"
-                    style={{ "--role-color": getRoleColor(profile.role) }}
-                  >
-                    <span className="breadcrumb-icon">{crumb.icon}</span>
-                    <span className="breadcrumb-label">{crumb.label}</span>
-                  </Link>
-                </div>
-              ))}
-            </div>
+            <nav className="breadcrumb-nav" aria-label="Breadcrumb navigation">
+              <ol className="breadcrumb-list">
+                {breadcrumbs.map((crumb, index) => (
+                  <li key={crumb.path} className="breadcrumb-item">
+                    {index > 0 && (
+                      <span className="breadcrumb-separator" aria-hidden="true">
+                        ›
+                      </span>
+                    )}
+                    <Link
+                      to={crumb.path}
+                      className="breadcrumb-link"
+                      style={{ "--role-color": getRoleColor(profile.role) }}
+                      aria-current={
+                        index === breadcrumbs.length - 1 ? "page" : undefined
+                      }
+                    >
+                      <span className="breadcrumb-icon" aria-hidden="true">
+                        {crumb.icon}
+                      </span>
+                      <span className="breadcrumb-label">{crumb.label}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </nav>
           </div>
         )}
       </nav>
@@ -242,8 +316,14 @@ export default function NavBar() {
       <div
         className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}
         onClick={closeMobileMenu}
+        aria-hidden="true"
       ></div>
-      <div className={`mobile-menu ${isMobileMenuOpen ? "open" : ""}`}>
+      <div
+        id="mobile-menu"
+        className={`mobile-menu ${isMobileMenuOpen ? "open" : ""}`}
+        role="navigation"
+        aria-label="Mobile navigation menu"
+      >
         <div className="mobile-menu-header">
           <div className="mobile-user-info">
             <div
@@ -261,12 +341,26 @@ export default function NavBar() {
               </div>
             </div>
           </div>
-          <button className="mobile-menu-close" onClick={closeMobileMenu}>
+          <button
+            className="mobile-menu-close"
+            onClick={closeMobileMenu}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                closeMobileMenu();
+              }
+            }}
+            aria-label="Close mobile menu"
+          >
             ✕
           </button>
         </div>
 
-        <nav className="mobile-nav">
+        <nav
+          className="mobile-nav"
+          role="menu"
+          aria-label="Mobile navigation menu"
+        >
           {navigationItems.map((item) => (
             <Link
               key={item.path}
@@ -276,8 +370,12 @@ export default function NavBar() {
               }`}
               onClick={closeMobileMenu}
               style={{ "--role-color": getRoleColor(profile.role) }}
+              role="menuitem"
+              aria-current={currentPath === item.path ? "page" : undefined}
             >
-              <span className="mobile-nav-icon">{item.icon}</span>
+              <span className="mobile-nav-icon" aria-hidden="true">
+                {item.icon}
+              </span>
               <span className="mobile-nav-label">{item.label}</span>
             </Link>
           ))}

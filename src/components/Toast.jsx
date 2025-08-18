@@ -44,17 +44,40 @@ export function Toast({
     }
   };
 
+  const getAriaLabel = () => {
+    switch (type) {
+      case "success":
+        return "Success notification";
+      case "error":
+        return "Error notification";
+      case "warning":
+        return "Warning notification";
+      case "info":
+      default:
+        return "Information notification";
+    }
+  };
+
   return (
     <div
       className={`toast toast-${type} toast-${position} ${
         isExiting ? "toast-exit" : "toast-enter"
       }`}
+      role="alert"
+      aria-live={type === "error" ? "assertive" : "polite"}
+      aria-label={getAriaLabel()}
     >
       <div className="toast-content">
-        <span className="toast-icon">{getIcon()}</span>
+        <span className="toast-icon" aria-hidden="true">
+          {getIcon()}
+        </span>
         <span className="toast-message">{message}</span>
       </div>
-      <button className="toast-close" onClick={handleClose}>
+      <button
+        className="toast-close"
+        onClick={handleClose}
+        aria-label="Close notification"
+      >
         ✕
       </button>
     </div>
@@ -64,7 +87,11 @@ export function Toast({
 // Toast Container Component
 export function ToastContainer({ toasts = [], position = "top-right" }) {
   return (
-    <div className={`toast-container toast-container-${position}`}>
+    <div
+      className={`toast-container toast-container-${position}`}
+      aria-label="Notifications"
+      role="region"
+    >
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

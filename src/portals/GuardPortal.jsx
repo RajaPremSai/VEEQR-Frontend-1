@@ -9,9 +9,18 @@ import GuardAnnouncements from "../guard/Announcements";
 
 export default function GuardPortal() {
   return (
-    <div className="portal-layout">
+    <div
+      className="portal-layout"
+      role="application"
+      aria-label="Security Guard Portal"
+    >
       <NavBar />
-      <main className="portal-content">
+      <main
+        id="main-content"
+        className="portal-content"
+        role="main"
+        aria-label="Main content area"
+      >
         <div className="container">
           <Routes>
             <Route index element={<GuardDashboard />} />

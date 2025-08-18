@@ -8,9 +8,14 @@ import UserProfile from "../user/Profile";
 
 export default function UserPortal() {
   return (
-    <div className="portal-layout">
+    <div className="portal-layout" role="application" aria-label="User Portal">
       <NavBar />
-      <main className="portal-content">
+      <main
+        id="main-content"
+        className="portal-content"
+        role="main"
+        aria-label="Main content area"
+      >
         <div className="container">
           <Routes>
             <Route index element={<UserDashboard />} />

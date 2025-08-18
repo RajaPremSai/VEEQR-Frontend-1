@@ -6,6 +6,9 @@ import { useAuth } from "./state/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
+import PerformanceReport from "./components/PerformanceReport";
+import KeyboardShortcuts from "./components/KeyboardShortcuts";
+import { useKeyboardUser } from "./utils/keyboardNavigation";
 
 // Lazy load portal components for better code splitting
 const UserPortal = lazy(() => import("./portals/UserPortal"));
@@ -14,6 +17,9 @@ const ManagerPortal = lazy(() => import("./portals/ManagerPortal"));
 
 export default function App() {
   const { isAuthenticated, profile } = useAuth();
+
+  // Initialize keyboard user detection
+  useKeyboardUser();
 
   const roleHome = () => {
     if (!isAuthenticated) return <Navigate to="/login" />;
@@ -25,6 +31,11 @@ export default function App() {
 
   return (
     <ErrorBoundary fallbackMessage="The application encountered an error. Please refresh the page to continue.">
+      {/* Skip link for keyboard navigation */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       <Routes>
         <Route path="/" element={roleHome()} />
         <Route path="/login" element={<Login />} />
@@ -71,6 +82,12 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
+      {/* Performance monitoring in development */}
+      <PerformanceReport />
+
+      {/* Keyboard shortcuts help - only show when authenticated */}
+      {isAuthenticated && <KeyboardShortcuts />}
     </ErrorBoundary>
   );
 }

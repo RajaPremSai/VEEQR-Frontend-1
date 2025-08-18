@@ -9,6 +9,11 @@ const Card = ({
   className = "",
   header,
   footer,
+  role,
+  ariaLabel,
+  ariaLabelledBy,
+  tabIndex,
+  onClick,
   ...props
 }) => {
   const baseClasses = "card";
@@ -28,11 +33,44 @@ const Card = ({
     .filter(Boolean)
     .join(" ");
 
+  // Determine if card is interactive
+  const isInteractive = onClick || tabIndex !== undefined;
+
   return (
-    <div className={cardClasses} {...props}>
-      {header && <div className="card-header">{header}</div>}
-      <div className="card-content">{children}</div>
-      {footer && <div className="card-footer">{footer}</div>}
+    <div
+      className={cardClasses}
+      role={role || (isInteractive ? "button" : undefined)}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      tabIndex={
+        isInteractive ? (tabIndex !== undefined ? tabIndex : 0) : undefined
+      }
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick(e);
+              }
+            }
+          : undefined
+      }
+      {...props}
+    >
+      {header && (
+        <div className="card-header" role="banner">
+          {header}
+        </div>
+      )}
+      <div className="card-content" role="main">
+        {children}
+      </div>
+      {footer && (
+        <div className="card-footer" role="contentinfo">
+          {footer}
+        </div>
+      )}
     </div>
   );
 };
